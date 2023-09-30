@@ -19,7 +19,7 @@ include("quantumrotorhmc.jl")
 # include("qrmhastings.jl")
 # include("qrmetropolis.jl")
 # include("quantumrotorhmc.jl")
-# include("quantumrotormeasurements.jl")
+include("quantumrotormeasurements.jl")
 # export top_charge
 
 
