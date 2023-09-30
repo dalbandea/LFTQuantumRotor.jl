@@ -12,26 +12,14 @@ abstract type CPAngleDifferenceDiscretization <: AbstractAngleDifferenceDiscreti
 abstract type StAngleDifferenceDiscretization <: AbstractAngleDifferenceDiscretization end
 abstract type StAngleDifferenceTrivMapDiscretization <: AbstractAngleDifferenceDiscretization end
 
-struct QuantumRotorParm{B <: AbstractBoundaryCondition, D <: AbstractDiscretization} <: LFTParm
+struct QuantumRotorParm{B <: AbstractBoundaryCondition, D <: AbstractDiscretization, T} <: LFTParm
     iT::Int64
     I::Float64
     BC::Type{B}
     disc::Type{D}
+    theta::T
 end
 
-struct QuantumRotorThetaParm{B <: AbstractBoundaryCondition, D <: AbstractDiscretization, TT} <: LFTParm
-    iT::Int64
-    I::Float64
-    theta::TT
-    BC::Type{B}
-    disc::Type{D}
+function QuantumRotorParm(; iT, I, BC::Type{B} = PeriodicBC, disc::Type{D} = ClassicalPerfectDiscretization, theta = 0.0) where {B <: AbstractBoundaryCondition, D <: AbstractDiscretization}
+    return QuantumRotorParm{BC, D, typeof(theta)}(iT, I, BC, disc, theta)
 end
-
-function QuantumRotorParm(; iT, I, BC::Type{B} = PeriodicBC, disc::Type{D} = ClassicalPerfectDiscretization) where {B <: AbstractBoundaryCondition, D <: AbstractDiscretization}
-    return QuantumRotorParm{BC, D}(iT, I, BC, disc)
-end
-
-function QuantumRotorThetaParm(; iT, I, BC::Type{B} = PeriodicBC, disc::Type{D} = ClassicalPerfectDiscretization) where {B <: AbstractBoundaryCondition, D <: AbstractDiscretization}
-    return QuantumRotorParm{BC, D}(iT, I, BC, disc)
-end
-
