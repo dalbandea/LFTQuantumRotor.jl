@@ -1,20 +1,18 @@
 import LFTSampling: sampler, copy!
 
-struct QuantumRotorWorkspace{T, N, P <: LFTParm} <: QuantumRotor
-    PRC::Type{T}
-    phi::Array{T, N}
+struct QuantumRotorWorkspace{T1, T2, N, P <: LFTParm} <: QuantumRotor
+    PRC::Type{T1}
+    phi::Array{T2, N}
     params::P
-    function QuantumRotorWorkspace(::Type{T}, lp::QuantumRotorParm) where {T}
-        phi = Array{T, 1}(undef, lp.iT)
-        return new{T, 1, typeof(lp)}(T, phi, lp)
+    function QuantumRotorWorkspace(::Type{T1}, ::Type{T2}=T1; params::QuantumRotorParm) where {T1,T2}
+        phi = Array{T2, 1}(undef, params.iT)
+        return new{T1,T2, 1, typeof(params)}(T1, phi, params)
     end
 end
 
-function (::Type{QuantumRotor})(::Type{T} = Float64; kwargs...) where {T}
-    return QuantumRotorWorkspace(T, QuantumRotorParm(;kwargs...))
+function (::Type{QuantumRotor})(::Type{T1} = Float64, ::Type{T2} = T1; kwargs...) where {T1,T2}
+    return QuantumRotorWorkspace(T1, T2, params=QuantumRotorParm(;kwargs...))
 end
-
-
 
 struct QuantumRotorHMC{A <: AbstractArray} <: AbstractHMC
     params::HMCParams
