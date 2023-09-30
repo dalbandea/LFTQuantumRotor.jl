@@ -3,10 +3,18 @@ function top_charge(qrws::QuantumRotor)
     Q = 0.0
 
     for i in 1:qrws.params.iT-1
-        Q += topcharge_t(qrws, i)
+        if qrws.params.theta == 0.0
+            Q += topcharge_t(qrws, i)
+        else
+            Q += cinf_topcharge_t(qrws,i)
+        end
     end
 
-    Q += boundary_topcharge(qrws)
+    if qrws.params.theta == 0.0
+        Q += boundary_topcharge(qrws)
+    else
+        Q += boundary_cinf_topcharge(qrws)
+    end
 
     return Q/2pi
 end
@@ -17,13 +25,29 @@ function topcharge_t(qrws::QuantumRotor, disc::Type{D}, t::Int64) where D <: Abs
     return Mod(qrws.phi[t], 2pi)
 end
 
+cinf_topcharge_t(qrws::QuantumRotor, t::Int64) = cinf_topcharge_t(qrws, t, qrws.params.disc)
+function cinf_topcharge_t(qrws::QuantumRotor, t::Int64, disc::Type{D}) where D <: AbstractAngleDifferenceDiscretization
+    return -im*log(exp(im*qrws.phi[t]))
+end
+
 boundary_topcharge(qrws::QuantumRotor) = boundary_topcharge(qrws, qrws.params.disc, qrws.params.BC)
+boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization = zero(qrws.PRC)
 function boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{PeriodicBC}) where D <: AbstractAngleDifferenceDiscretization
     qt = zero(qrws.PRC)
     for t in 1:qrws.params.iT-1
         qt -= qrws.phi[t]
     end
     return Mod(qt, 2pi)
+end
+
+boundary_cinf_topcharge(qrws::QuantumRotor) = cinf_boundary_topcharge(qrws, qrws.params.disc, qrws.params.BC)
+cinf_boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization = zero(qrws.PRC)
+function cinf_boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{PeriodicBC}) where D <: AbstractAngleDifferenceDiscretization
+    qt = zero(qrws.PRC)
+    for t in 1:qrws.params.iT-1
+        qt -= qrws.phi[t]
+    end
+    return -im*log(exp(im*qt))
 end
 
 # abstract type Susceptibility <: AbstractObservable end
