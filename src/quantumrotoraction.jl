@@ -5,6 +5,16 @@ action_discretization_factor(::Type{StAngleDifferenceDiscretization}) = 1.0
 action_discretization_factor(::Type{StAngleDifferenceTrivMapDiscretization}) = 1.0
 action_discretization_factor(::Type{CPAngleDifferenceDiscretization}) = 0.5
 
+theta_term(qrws::QuantumRotor) = theta_term(qrws, qrws.params.disc)
+function theta_term(qrws::QuantumRotor, ::Type{D}) where D <: AbstractDiscretization
+    if qrws.params.theta == 0.0
+        return 0.0
+    else
+        return top_charge(qrws)*qrws.params.theta
+    end
+end
+
+
 function action(qrws::QuantumRotor)
     S = zero(qrws.PRC)
 
@@ -13,7 +23,7 @@ function action(qrws::QuantumRotor)
     end
     S += boundary_action(qrws)
 
-    return qrws.params.I * S * action_discretization_factor(qrws.params.disc)
+    return qrws.params.I * S * action_discretization_factor(qrws.params.disc) + theta_term(qrws)
 end
 
 action_t(qrws::QuantumRotor, t::Int64) = action_t(qrws, qrws.params.disc, t)

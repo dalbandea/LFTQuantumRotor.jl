@@ -7,16 +7,16 @@ function sample!(qrws::QuantumRotor, samplerws::AbstractHMC; do_winding = false)
 end
 
 generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC) = generate_momenta!(qrws, hmcws, qrws.params.disc)
-function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{AbstractDiscretization})
+function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}) where D <: AbstractDiscretization
     for i in 1:length(hmcws.mom)
-        hmcws.mom[i] = randn() * hmcws.params.width
+        hmcws.mom[i] = randn(qrws.PRC) * hmcws.params.width
     end
     return nothing
 end
 
 function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceDiscretization})
     for i in 1:length(hmcws.mom)-1
-        hmcws.mom[i] = randn() * hmcws.params.width
+        hmcws.mom[i] = randn(qrws.PRC) * hmcws.params.width
     end
     hmcws.mom[qrws.params.iT] = zero(qrws.PRC)
     return nothing
@@ -24,7 +24,7 @@ end
 
 function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceTrivMapDiscretization})
     for i in 1:length(hmcws.mom)-1
-        hmcws.mom[i] = randn() * hmcws.params.width
+        hmcws.mom[i] = randn(qrws.PRC) * hmcws.params.width
     end
     hmcws.mom[qrws.params.iT] = zero(qrws.PRC)
     return nothing
@@ -39,10 +39,18 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC)
     return force!(qrws, hmcws, qrws.params.disc, qrws.params.BC)
 end
 
-function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceDiscretization}, BC::Type{OpenBC})
+function theta_force(qrws::QuantumRotor, BC::Type{OpenBC}) 
+    if qrws.params.theta == 0.0
+        return 0.0
+    else
+        return one(qrws.PRC)*qrws.params.theta
+    end
+end
+
+function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
 
     for t in 1:qrws.params.iT-1
-        hmcws.frc[t] = -qrws.params.I * sin(qrws.phi[t])
+        hmcws.frc[t] = force_t(qrws, t, disc)
     end
 
     boundary_force!(qrws, hmcws, disc, BC)
@@ -50,7 +58,15 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDi
     return nothing
 end
 
-function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceDiscretization}, BC::Type{OpenBC})
+function force_t(qrws::QuantumRotor, t::Int64, disc::Type{StAngleDifferenceDiscretization})
+    return -qrws.params.I * sin(qrws.phi[t]) - theta_force(qrws, qrws.params.BC)
+end
+
+function force_t(qrws::QuantumRotor, t::Int64, disc::Type{CPAngleDifferenceDiscretization})
+    return -qrws.params.I * Mod(qrws.phi[t],2pi) - theta_force(qrws, qrws.params.BC)
+end
+
+function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
     hmcws.frc[qrws.params.iT] = zero(qrws.PRC)
     return nothing
 end
