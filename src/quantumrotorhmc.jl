@@ -1,5 +1,27 @@
 import LFTSampling: sample!, generate_momenta!, Hamiltonian, update_momenta!, update_fields!
 
+function winding_step!(qrws::QuantumRotor)
+    ws_cp = deepcopy(qrws)
+
+    sini = action(qrws)
+
+    r = rand()
+
+    if r > 0.5
+        winding!(qrws)
+    else
+        antiwinding!(qrws)
+    end
+
+    sfin = action(qrws)
+
+    ds = sfin - sini
+
+    metropolis_accept_reject!(qrws, ws_cp, ds)
+
+    return nothing
+end
+
 ###########################
 # Abstract Discretization #
 ###########################
