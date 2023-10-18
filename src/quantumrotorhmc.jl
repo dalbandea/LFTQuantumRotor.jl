@@ -17,7 +17,7 @@ function winding_step!(qrws::QuantumRotor)
 
     ds = sfin - sini
 
-    metropolis_accept_reject!(qrws, ws_cp, ds)
+    LFTSampling.metropolis_accept_reject!(qrws, ws_cp, ds)
 
     return nothing
 end
