@@ -94,10 +94,15 @@ function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Typ
     return nothing
 end
 
-function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
+function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{B}) where {D <: AbstractAngleDifferenceDiscretization, B <: AbstractBoundaryCondition}
 
     for t in 1:qrws.params.iT-1
         hmcws.frc[t] = force_t(qrws, t, disc)
+    end
+
+    if B == PeriodicBC && D == StAngleDifferenceDiscretization
+        sumphi = @views sum(qrws.phi[1:end-1])
+        hmcws.frc .-= qrws.params.I * sin(sumphi) 
     end
 
     boundary_force!(qrws, hmcws, disc, BC)
@@ -115,18 +120,6 @@ end
 
 function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
     hmcws.frc[qrws.params.iT] = zero(qrws.PRC)
-    return nothing
-end
-
-function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceDiscretization}, BC::Type{PeriodicBC})
-
-    sumphi = @views sum(qrws.phi[1:end-1])
-    for t in 1:qrws.params.iT-1
-        hmcws.frc[t] = -qrws.params.I * (sin(qrws.phi[t]) + sin(sumphi))
-    end
-
-    boundary_force!(qrws, hmcws, disc, BC)
-    
     return nothing
 end
 
