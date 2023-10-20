@@ -2,7 +2,6 @@ import LFTSampling: action
 
 action_discretization_factor(::Type{AbstractDiscretization}) = 0.5
 action_discretization_factor(::Type{StAngleDifferenceDiscretization}) = 1.0
-action_discretization_factor(::Type{StAngleDifferenceTrivMapDiscretization}) = 1.0
 action_discretization_factor(::Type{CPAngleDifferenceDiscretization}) = 0.5
 
 theta_term(qrws::QuantumRotor) = theta_term(qrws, qrws.params.disc)
@@ -38,10 +37,6 @@ function action_t(qrws::QuantumRotor, disc::Type{StAngleDifferenceDiscretization
     return ds
 end
 
-function action_t(qrws::QuantumRotor, disc::Type{StAngleDifferenceTrivMapDiscretization}, t::Int64)
-    ds = 1-cos(qrws.phi[t]/sqrt(10*qrws.params.I))
-    return ds
-end
 
 boundary_action(qrws::QuantumRotor) = boundary_action(qrws, qrws.params.disc, qrws.params.BC)
 boundary_action(qrws::QuantumRotor, disc::Type{CPAngleDifferenceDiscretization}, BC::Type{OpenBC}) = zero(qrws.PRC)
@@ -60,14 +55,6 @@ function boundary_action(qrws::QuantumRotor, disc::Type{StAngleDifferenceDiscret
         qt -= qrws.phi[t]
     end
     return 1 - cos(qt)
-end
-
-function boundary_action(qrws::QuantumRotor, disc::Type{StAngleDifferenceTrivMapDiscretization}, BC::Type{PeriodicBC})
-    qt = zero(qrws.PRC)
-    for t in 1:qrws.params.iT-1
-        qt -= qrws.phi[t]
-    end
-    return 1 - cos(qt/sqrt(10*qrws.params.I))
 end
 
 

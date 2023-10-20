@@ -8,7 +8,7 @@ export QuantumRotor
 
 include("quantumrotortypes.jl")
 export OpenBC, PeriodicBC
-export CPAngleDifferenceDiscretization, StAngleDifferenceDiscretization, StAngleDifferenceTrivMapDiscretization
+export CPAngleDifferenceDiscretization, StAngleDifferenceDiscretization
 export QuantumRotorParm
 
 include("quantumrotorfields.jl")

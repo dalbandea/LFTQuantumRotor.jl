@@ -94,15 +94,6 @@ function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Typ
     return nothing
 end
 
-function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceTrivMapDiscretization})
-    for i in 1:length(hmcws.mom)-1
-        hmcws.mom[i] = randn(qrws.PRC) * hmcws.params.width
-    end
-    hmcws.mom[qrws.params.iT] = zero(qrws.PRC)
-    return nothing
-end
-
-
 function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
 
     for t in 1:qrws.params.iT-1
@@ -143,22 +134,4 @@ function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{
     hmcws.frc[qrws.params.iT] = zero(qrws.PRC)
     return nothing
 end
-
-function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceTrivMapDiscretization}, BC::Type{PeriodicBC})
-
-    sumphi = @views sum(qrws.phi[1:end-1])
-    for t in 1:qrws.params.iT-1
-        hmcws.frc[t] = -qrws.params.I / sqrt(10*qrws.params.I) * (sin(qrws.phi[t]/sqrt(10*qrws.params.I)) + sin(sumphi/sqrt(10*qrws.params.I)))
-    end
-
-    boundary_force!(qrws, hmcws, disc, BC)
-    
-    return nothing
-end
-
-function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StAngleDifferenceTrivMapDiscretization}, BC::Type{PeriodicBC})
-    hmcws.frc[qrws.params.iT] = zero(qrws.PRC)
-    return nothing
-end
-
 
