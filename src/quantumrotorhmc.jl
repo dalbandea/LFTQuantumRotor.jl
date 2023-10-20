@@ -68,7 +68,8 @@ function update_momenta!(qrws::QuantumRotor, epsilon, hmcws::QuantumRotorHMC)
     return nothing
 end
 
-function update_fields!(qrws::QuantumRotor, epsilon, hmcws::QuantumRotorHMC)
+update_fields!(qrws::QuantumRotor, epsilon, hmcws::QuantumRotorHMC) = update_fields!(qrws, epsilon, hmcws, qrws.aux)
+function update_fields!(qrws::QuantumRotor, epsilon, hmcws::QuantumRotorHMC, aux::AbstractAuxFields)
     # Update phi field
     qrws.phi .= qrws.phi .+ epsilon .* hmcws.mom ./ hmcws.params.width^2
     return nothing

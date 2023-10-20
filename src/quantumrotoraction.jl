@@ -13,8 +13,8 @@ function theta_term(qrws::QuantumRotor, ::Type{D}) where D <: AbstractDiscretiza
     end
 end
 
-
-function action(qrws::QuantumRotor)
+action(qrws::QuantumRotor) = action(qrws, qrws.aux)
+function action(qrws::QuantumRotor, aux::AUX) where AUX <: AbstractAuxFields
     S = zero(qrws.PRC)
 
     for t in 1:qrws.params.iT-1

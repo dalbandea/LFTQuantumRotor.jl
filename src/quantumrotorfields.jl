@@ -1,17 +1,18 @@
 import LFTSampling: sampler, copy!
 
-struct QuantumRotorWorkspace{T1, T2, N, P <: LFTParm} <: QuantumRotor
+struct QuantumRotorWorkspace{T1, T2, N, P <: LFTParm, AUX <: AbstractAuxFields} <: QuantumRotor
     PRC::Type{T1}
     phi::Array{T2, N}
     params::P
-    function QuantumRotorWorkspace(::Type{T1}, ::Type{T2}=T1; params::QuantumRotorParm) where {T1,T2}
+    aux::AUX
+    function QuantumRotorWorkspace(::Type{T1}, ::Type{T2}=T1; aux::T3 = FallbackAuxField(), params::QuantumRotorParm) where {T1,T2,T3<:AbstractAuxFields}
         phi = Array{T2, 1}(undef, params.iT)
-        return new{T1,T2, 1, typeof(params)}(T1, phi, params)
+        return new{T1,T2, 1, typeof(params), typeof(aux)}(T1, phi, params, aux)
     end
 end
 
-function (::Type{QuantumRotor})(::Type{T1} = Float64, ::Type{T2} = T1; kwargs...) where {T1,T2}
-    return QuantumRotorWorkspace(T1, T2, params=QuantumRotorParm(;kwargs...))
+function (::Type{QuantumRotor})(::Type{T1} = Float64, ::Type{T2} = T1; aux::T3 = FallbackAuxField(), kwargs...) where {T1,T2,T3<:AbstractAuxFields}
+    return QuantumRotorWorkspace(T1, T2, aux = aux, params=QuantumRotorParm(;kwargs...))
 end
 
 struct QuantumRotorHMC{A <: AbstractArray} <: AbstractHMC
