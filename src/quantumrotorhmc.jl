@@ -3,7 +3,7 @@ import LFTSampling: sample!, generate_momenta!, Hamiltonian, update_momenta!, up
 function winding_step!(qrws::QuantumRotor)
     ws_cp = deepcopy(qrws)
 
-    sini = action(qrws)
+    sini = action(qrws, FallbackAuxField())
 
     r = rand()
 
@@ -13,7 +13,7 @@ function winding_step!(qrws::QuantumRotor)
         antiwinding!(qrws)
     end
 
-    sfin = action(qrws)
+    sfin = action(qrws, FallbackAuxField())
 
     ds = sfin - sini
 
@@ -46,7 +46,7 @@ function Hamiltonian(qrws::QuantumRotor, hmcws::QuantumRotorHMC)
 end
 
 function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC)
-    return force!(qrws, hmcws, qrws.params.disc, qrws.params.BC)
+    return force!(qrws, hmcws, qrws.params.disc, qrws.params.BC, qrws.aux)
 end
 
 function theta_force(qrws::QuantumRotor, BC::Type{B}) where B <: AbstractBoundaryCondition 
@@ -95,7 +95,7 @@ function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Typ
     return nothing
 end
 
-function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{B}) where {D <: AbstractAngleDifferenceDiscretization, B <: AbstractBoundaryCondition}
+function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{B}, aux::AUX) where {D <: AbstractAngleDifferenceDiscretization, B <: AbstractBoundaryCondition, AUX <: AbstractAuxFields}
 
     for t in 1:qrws.params.iT-1
         hmcws.frc[t] = force_t(qrws, t, disc)
