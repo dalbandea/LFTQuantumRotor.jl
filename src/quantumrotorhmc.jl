@@ -49,7 +49,7 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC)
     return force!(qrws, hmcws, qrws.params.disc, qrws.params.BC)
 end
 
-function theta_force(qrws::QuantumRotor, BC::Type{OpenBC}) 
+function theta_force(qrws::QuantumRotor, BC::Type{B}) where B <: AbstractBoundaryCondition 
     if qrws.params.theta == 0.0
         return 0.0
     else
