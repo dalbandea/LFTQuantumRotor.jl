@@ -49,14 +49,6 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC)
     return force!(qrws, hmcws, qrws.params.disc, qrws.params.BC, qrws.aux)
 end
 
-function theta_force(qrws::QuantumRotor, BC::Type{B}) where B <: AbstractBoundaryCondition 
-    if qrws.params.theta == 0.0
-        return 0.0
-    else
-        return one(qrws.PRC)*qrws.params.theta
-    end
-end
-
 function update_momenta!(qrws::QuantumRotor, epsilon, hmcws::QuantumRotorHMC)
 
     # Load phi force
@@ -97,13 +89,19 @@ end
 
 function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{B}, aux::AUX) where {D <: AbstractAngleDifferenceDiscretization, B <: AbstractBoundaryCondition, AUX <: AbstractAuxFields}
 
-    for t in 1:qrws.params.iT-1
-        hmcws.frc[t] = force_t(qrws, t, disc)
-    end
-
     if B == PeriodicBC && D == StAngleDifferenceDiscretization
         sumphi = @views sum(qrws.phi[1:end-1])
-        hmcws.frc .-= qrws.params.I * sin(sumphi) 
+    end
+
+    for t in 1:qrws.params.iT-1
+        hmcws.frc[t] = force_t(qrws, t, disc) + theta_force_t(qrws, t, disc)
+        if B == PeriodicBC && D == StAngleDifferenceDiscretization
+            sumphi = @views sum(qrws.phi[1:end-1])
+            hmcws.frc[t] -= qrws.params.I * sin(sumphi) 
+            if qrws.params.theta != 0.0
+                hmcws.frc[t] += 1/2pi * cos(sumphi)
+            end
+        end
     end
 
     boundary_force!(qrws, hmcws, disc, BC)
@@ -112,12 +110,14 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::T
 end
 
 function force_t(qrws::QuantumRotor, t::Int64, disc::Type{StAngleDifferenceDiscretization})
-    return -qrws.params.I * sin(qrws.phi[t]) - theta_force(qrws, qrws.params.BC)
+    return -qrws.params.I * sin(qrws.phi[t])
 end
 
 function force_t(qrws::QuantumRotor, t::Int64, disc::Type{CPAngleDifferenceDiscretization})
-    return -qrws.params.I * Mod(qrws.phi[t],2pi) - theta_force(qrws, qrws.params.BC)
+    return -qrws.params.I * Mod(qrws.phi[t],2pi)
 end
+
+theta_force_t(qrws::QuantumRotor, t::Int64, disc) = -1/2pi * cos(qrws.phi[t])
 
 function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
     hmcws.frc[qrws.params.iT] = zero(qrws.PRC)

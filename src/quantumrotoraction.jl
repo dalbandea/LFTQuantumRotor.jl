@@ -4,12 +4,12 @@ action_discretization_factor(::Type{AbstractDiscretization}) = 0.5
 action_discretization_factor(::Type{StAngleDifferenceDiscretization}) = 1.0
 action_discretization_factor(::Type{CPAngleDifferenceDiscretization}) = 0.5
 
-theta_term(qrws::QuantumRotor) = theta_term(qrws, qrws.params.disc)
-function theta_term(qrws::QuantumRotor, ::Type{D}) where D <: AbstractDiscretization
+theta_term(qrws::QuantumRotor) = theta_term(qrws, qrws.params.disc, qrws.aux)
+function theta_term(qrws::QuantumRotor, ::Type{D}, aux::AUX) where {D <: AbstractDiscretization, AUX <: AbstractAuxFields}
     if qrws.params.theta == 0.0
         return 0.0
     else
-        return top_charge(qrws)*qrws.params.theta
+        return diff_top_charge(qrws)*qrws.params.theta
     end
 end
 

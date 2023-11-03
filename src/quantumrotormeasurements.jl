@@ -50,6 +50,25 @@ function cinf_boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{Per
     return -im*log(exp(im*qt))
 end
 
+diff_top_charge(qrws::LFTQuantumRotor.QuantumRotor) = diff_top_charge(qrws, qrws.params.disc, qrws.params.BC)
+function diff_top_charge(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{D}, ::Type{BC}) where {D <: LFTQuantumRotor.AbstractAngleDifferenceDiscretization, BC <: LFTQuantumRotor.AbstractBoundaryCondition}
+    Q = zero(eltype(qrws.phi))
+    qt = zero(eltype(qrws.phi))
+    for i in 1:qrws.params.iT-1
+        qt -= qrws.phi[i]
+        Q += sin(qrws.phi[i])
+    end
+
+    if BC == LFTQuantumRotor.PeriodicBC
+        Q += sin(qt) 
+    elseif BC == LFTQuantumRotor.OpenBC
+    else
+        error("This should not happen")
+    end
+    return Q/2pi
+end
+
+
 # abstract type Susceptibility <: AbstractObservable end
 
 # struct QRMasterObs end
