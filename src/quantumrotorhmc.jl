@@ -67,11 +67,6 @@ function update_fields!(qrws::QuantumRotor, epsilon, hmcws::QuantumRotorHMC, aux
     return nothing
 end
 
-function flip_momenta_sign!(hmcws::QuantumRotorHMC)
-    hmcws.mom .= .- hmcws.mom
-    return nothing
-end
-
 
 
 
@@ -99,7 +94,7 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::T
             sumphi = @views sum(qrws.phi[1:end-1])
             hmcws.frc[t] -= qrws.params.I * sin(sumphi) 
             if qrws.params.theta != 0.0
-                hmcws.frc[t] += 1/2pi * cos(sumphi)
+                hmcws.frc[t] += 1/2pi * cos(sumphi) * qrws.params.theta
             end
         end
     end
@@ -117,7 +112,9 @@ function force_t(qrws::QuantumRotor, t::Int64, disc::Type{CPAngleDifferenceDiscr
     return -qrws.params.I * Mod(qrws.phi[t],2pi)
 end
 
-theta_force_t(qrws::QuantumRotor, t::Int64, disc) = -1/2pi * cos(qrws.phi[t])
+function theta_force_t(qrws::QuantumRotor, t::Int64, disc) 
+    return -1/2pi * cos(qrws.phi[t]) * qrws.params.theta
+end
 
 function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization
     hmcws.frc[qrws.params.iT] = zero(qrws.PRC)

@@ -20,6 +20,7 @@ include("quantumrotorhmc.jl")
 # include("qrmetropolis.jl")
 # include("quantumrotorhmc.jl")
 include("quantumrotormeasurements.jl")
+include("quantumrotortestfunctions.jl")
 # export top_charge
 
 
