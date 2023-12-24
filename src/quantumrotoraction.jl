@@ -1,6 +1,7 @@
 import LFTSampling: action
 
 action_discretization_factor(::Type{AbstractDiscretization}) = 0.5
+action_discretization_factor(::Type{StandardDiscretization}) = 1.0
 action_discretization_factor(::Type{StAngleDifferenceDiscretization}) = 1.0
 action_discretization_factor(::Type{CPAngleDifferenceDiscretization}) = 0.5
 
@@ -26,6 +27,12 @@ function action(qrws::QuantumRotor, aux::AUX) where AUX <: AbstractAuxFields
 end
 
 action_t(qrws::QuantumRotor, t::Int64) = action_t(qrws, qrws.params.disc, t)
+
+
+function action_t(qrws::QuantumRotor, disc::Type{StandardDiscretization}, t::Int64)
+    ds = 1-cos(qrws.phi[t+1]-qrws.phi[t])
+    return ds
+end
 
 function action_t(qrws::QuantumRotor, disc::Type{CPAngleDifferenceDiscretization}, t::Int64)
     ds = Mod(qrws.phi[t], 2pi)^2
@@ -55,6 +62,10 @@ function boundary_action(qrws::QuantumRotor, disc::Type{StAngleDifferenceDiscret
         qt -= qrws.phi[t]
     end
     return 1 - cos(qt)
+end
+
+function boundary_action(qrws::QuantumRotor, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC})
+    return 1-cos(qrws.phi[1]-qrws.phi[end])
 end
 
 

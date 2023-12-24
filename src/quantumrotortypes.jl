@@ -6,6 +6,7 @@ abstract type OpenBC <: AbstractBoundaryCondition end
 
 abstract type AbstractDiscretization end
 abstract type ClassicalPerfectDiscretization <: AbstractDiscretization end
+abstract type StandardDiscretization <: AbstractDiscretization end
 
 abstract type AbstractAngleDifferenceDiscretization <: AbstractDiscretization end
 abstract type CPAngleDifferenceDiscretization <: AbstractAngleDifferenceDiscretization end

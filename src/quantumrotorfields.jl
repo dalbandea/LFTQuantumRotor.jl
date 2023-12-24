@@ -60,13 +60,13 @@ winding!(qrws::QuantumRotor) = winding!(qrws, qrws.params.disc)
 winding!(qrws::QuantumRotor, L::Integer) = winding!(qrws, qrws.params.disc, L)
 antiwinding!(qrws::QuantumRotor) = antiwinding!(qrws, qrws.params.disc)
 
-function winding!(qrws::QuantumRotor, disc::Type{AbstractDiscretization})
+function winding!(qrws::QuantumRotor, disc::Type{D}) where D <: AbstractDiscretization
     for i in 1:qrws.params.iT
         qrws.phi[i] = qrws.phi[i] + (i-1) * 2pi/qrws.params.iT
     end
 end
 
-function antiwinding!(qrws::QuantumRotor, disc::Type{AbstractDiscretization})
+function antiwinding!(qrws::QuantumRotor, disc::Type{D}) where D <: AbstractDiscretization
     for i in 1:qrws.params.iT
         qrws.phi[i] = qrws.phi[i] - (i-1) * 2pi/qrws.params.iT
     end
