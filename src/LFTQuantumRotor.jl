@@ -2,6 +2,7 @@ module LFTQuantumRotor
 
 using LFTSampling
 import Random
+import BDIO
 
 abstract type QuantumRotor <: AbstractLFT end
 export QuantumRotor
@@ -23,6 +24,7 @@ include("quantumrotormeasurements.jl")
 export diff_top_charge
 include("quantumrotorutils.jl")
 include("quantumrotortestfunctions.jl")
+include("quantumrotorIO.jl")
 # export top_charge
 
 

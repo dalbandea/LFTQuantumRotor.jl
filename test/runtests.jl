@@ -10,4 +10,8 @@ using LFTQuantumRotor
     @testset verbose = true "HMC tests" begin
         include("hmctests.jl")
     end
+
+    @testset verbose = true "I/O tests" begin
+        include("iotests.jl")
+    end
 end
