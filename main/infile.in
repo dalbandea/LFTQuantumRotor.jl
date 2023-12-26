@@ -1,0 +1,16 @@
+["Model params"]
+I = 5.0
+T = 500
+BC = 'PeriodicBC'
+disc = 'StandardDiscretization'
+theta = 0.0
+
+["HMC params"]
+tau = 1.0
+nsteps = 10
+ntherm = 100
+ntraj = 100000
+windings = true
+
+["Working directory"]
+wdir = "trash"
