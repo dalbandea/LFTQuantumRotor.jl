@@ -22,3 +22,23 @@ for i in 1:length(ens)
 end
 
 rm(fname, force=true)
+
+
+fname = "qriotest.bdio"
+isfile(fname) && error("File already exists!")
+
+for i in 1:length(ens)
+    randomize!(ens[i])
+    randomize!(rens[i])
+end
+
+save_ensemble(fname, ens)
+
+rens = LFTSampling.read_ensemble(fname, QuantumRotor)
+
+for i in 1:length(ens)
+    @test ens[i].params == rens[i].params
+    @test ens[i].phi == rens[i].phi
+end
+
+rm(fname, force=true)

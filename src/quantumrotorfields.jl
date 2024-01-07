@@ -40,7 +40,7 @@ function randomize!(qrws::QuantumRotor)
 end
 
 function coldstart!(qrws::QuantumRotor)
-    qrws.phi .= one(qrws.PRC)
+    qrws.phi .= zero(qrws.PRC)
 end
 
 #custom mod
