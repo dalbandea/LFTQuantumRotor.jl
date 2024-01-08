@@ -72,31 +72,50 @@ end
 # Standard Discretization #
 ###########################
 
-function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC}, aux::AUX) where {AUX <: AbstractAuxFields}
+function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{B}, aux::AUX) where {AUX <: AbstractAuxFields, B <: AbstractBoundaryCondition}
 
-    for t in 1:qrws.params.iT-1
+    for t in 2:qrws.params.iT-1
         hmcws.frc[t] = force_t(qrws, t, disc) + theta_force_t(qrws, t, disc)
     end
 
-    boundary_force!(qrws, hmcws, disc, BC)
+    left_boundary_force!(qrws, hmcws, disc, BC)
+    right_boundary_force!(qrws, hmcws, disc, BC)
     
     return nothing
 end
 
 function force_t(qrws::QuantumRotor, t::Int64, disc::Type{StandardDiscretization})
-    return +qrws.params.I * ( sin(qrws.phi[t+1]-qrws.phi[t]) - sin(qrws.phi[t]-qrws.phi[mod1(t-1,qrws.params.iT)]) )
+    return +qrws.params.I * ( sin(qrws.phi[t+1]-qrws.phi[t]) - sin(qrws.phi[t]-qrws.phi[t-1]) )
 end
 
-function boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC})
+function theta_force_t(qrws::QuantumRotor, t::Int64, disc::Type{StandardDiscretization}) 
+    iT = qrws.params.iT
+    return -1/2pi * ( cos(qrws.phi[t] - qrws.phi[t-1]) - cos(qrws.phi[t+1] - qrws.phi[t]) ) * qrws.params.theta
+end
+
+function right_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC})
     iT = qrws.params.iT
     hmcws.frc[iT] = +qrws.params.I * ( sin(qrws.phi[1]-qrws.phi[iT]) - sin(qrws.phi[iT]-qrws.phi[iT-1]) ) -1/2pi * ( cos(qrws.phi[iT] - qrws.phi[iT-1]) - cos(qrws.phi[1] - qrws.phi[iT]) ) * qrws.params.theta
     return nothing
 end
 
-function theta_force_t(qrws::QuantumRotor, t::Int64, disc::Type{StandardDiscretization}) 
+function left_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC})
     iT = qrws.params.iT
-    return -1/2pi * ( cos(qrws.phi[t] - qrws.phi[mod1(t-1, iT)]) - cos(qrws.phi[t+1] - qrws.phi[t]) ) * qrws.params.theta
+    hmcws.frc[1] = +qrws.params.I * ( sin(qrws.phi[2]-qrws.phi[1]) - sin(qrws.phi[1]-qrws.phi[iT]) ) -1/2pi * ( cos(qrws.phi[1] - qrws.phi[iT]) - cos(qrws.phi[2] - qrws.phi[1]) ) * qrws.params.theta
+    return nothing
 end
+
+function right_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{OpenBC})
+    iT = qrws.params.iT
+    hmcws.frc[iT] = +qrws.params.I * ( - sin(qrws.phi[iT]-qrws.phi[iT-1]) ) -1/2pi * ( cos(qrws.phi[iT] - qrws.phi[iT-1]) ) * qrws.params.theta
+    return nothing
+end
+
+function left_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{OpenBC})
+    hmcws.frc[1] = +qrws.params.I * ( sin(qrws.phi[2]-qrws.phi[1]) ) +1/2pi * ( cos(qrws.phi[2] - qrws.phi[1]) ) * qrws.params.theta
+    return nothing
+end
+
 
 
 ###################################

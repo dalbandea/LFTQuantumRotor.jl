@@ -64,7 +64,7 @@ for BC in [PeriodicBC, OpenBC]
 end
 
 
-for BC in [PeriodicBC]
+for BC in [PeriodicBC, OpenBC]
     model = QuantumRotor(
                          Float64, 
                          I = I, 
@@ -80,14 +80,14 @@ for BC in [PeriodicBC]
     LFTSampling.generate_momenta!(model, samplerws)
 
 
-    @testset "StDisc HMC reversibility" begin
+    @testset "StDisc $(model.params.BC) HMC reversibility" begin
         model_bckp = deepcopy(model)
         LFTSampling.reversibility!(model, samplerws)
         dphi = model.phi .- model_bckp.phi
         @test isapprox(zero(model.PRC), mapreduce(x -> abs2(x), +, dphi), atol = 1e-15)
     end
 
-    @testset verbose = true "StDisc HMC force" begin
+    @testset verbose = true "StDisc $(model.params.BC) HMC force" begin
         dF = LFTSampling.force_test(model, samplerws, 1e-6)
         @test isapprox(zero(model.PRC), dF, atol = 1e-5)
     end
@@ -95,7 +95,7 @@ for BC in [PeriodicBC]
 end
 
 
-for BC in [PeriodicBC]
+for BC in [PeriodicBC, OpenBC]
     model = QuantumRotor(
                          Float64, 
                          I = I, 
@@ -111,15 +111,14 @@ for BC in [PeriodicBC]
     samplerws = LFTSampling.sampler(model, smplr)
     LFTSampling.generate_momenta!(model, samplerws)
 
-
-    @testset "StDisc θ=1.0 HMC reversibility" begin
+    @testset "StDisc $(model.params.BC) θ=1.0 HMC reversibility" begin
         model_bckp = deepcopy(model)
         LFTSampling.reversibility!(model, samplerws)
         dphi = model.phi .- model_bckp.phi
         @test isapprox(zero(model.PRC), mapreduce(x -> abs2(x), +, dphi), atol = 1e-15)
     end
 
-    @testset verbose = true "StDisc θ=1.0 HMC force" begin
+    @testset verbose = true "StDisc $(model.params.BC) θ=1.0 HMC force" begin
         dF = LFTSampling.force_test(model, samplerws, 1e-6)
         @test isapprox(zero(model.PRC), dF, atol = 1e-5)
     end

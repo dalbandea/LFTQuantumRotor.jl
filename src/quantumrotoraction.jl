@@ -68,6 +68,10 @@ function boundary_action(qrws::QuantumRotor, disc::Type{StandardDiscretization},
     return 1-cos(qrws.phi[1]-qrws.phi[end])
 end
 
+function boundary_action(qrws::QuantumRotor, disc::Type{StandardDiscretization}, BC::Type{OpenBC})
+    return zero(eltype(qrws.phi))
+end
+
 
 # function action_t(qrws::QuantumRotor, disc::Type{ClassicalPerfectDiscretization}, t::Int64)
 #     tu = right(qrws, t)

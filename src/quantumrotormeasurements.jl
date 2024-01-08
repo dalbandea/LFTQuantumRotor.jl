@@ -68,13 +68,15 @@ function diff_top_charge(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{D}, ::Ty
     return Q/2pi
 end
 
-function diff_top_charge(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{StandardDiscretization}, ::Type{PeriodicBC})
+function diff_top_charge(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{StandardDiscretization}, ::Type{BC}) where BC <: AbstractBoundaryCondition
     Q = zero(eltype(qrws.phi))
     for i in 1:qrws.params.iT-1
         Q += sin(qrws.phi[i+1]-qrws.phi[i])
     end
 
-    Q += sin(qrws.phi[1]-qrws.phi[qrws.params.iT]) 
+    if BC == LFTQuantumRotor.PeriodicBC
+        Q += sin(qrws.phi[1]-qrws.phi[qrws.params.iT]) 
+    end
 
     return Q/2pi
 end
