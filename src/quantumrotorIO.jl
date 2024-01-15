@@ -21,7 +21,7 @@ function save_cnfg_header(fb::BDIO.BDIOstream, qrws::QuantumRotor)
     return nothing
 end
 
-function read_cnfg_info(fname::String, ::Type{LFTQuantumRotor.QuantumRotor})
+function read_cnfg_info(fname::String, ::Type{LFTQuantumRotor.QuantumRotor}; modul::Module = LFTQuantumRotor)
 
     fb = BDIO.BDIO_open(fname, "r")
 
@@ -37,7 +37,7 @@ function read_cnfg_info(fname::String, ::Type{LFTQuantumRotor.QuantumRotor})
     iT      = convert(Int64, ifoo[1])
     BC      = eval(Meta.parse(BDIO.BDIO_read_str(fb)))
     disc    = eval(Meta.parse(BDIO.BDIO_read_str(fb)))
-    thtp    = eval(Meta.parse(BDIO.BDIO_read_str(fb)))
+    thtp    = Base.eval(modul, Meta.parse(BDIO.BDIO_read_str(fb)))
     thfoo   = [zero(thtp)]
     BDIO.BDIO_read(fb, thfoo)
     theta   = thfoo[1]
