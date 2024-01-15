@@ -2,19 +2,25 @@
 function top_charge(qrws::QuantumRotor)
     Q = 0.0
 
+    # for i in 1:qrws.params.iT-1
+    #     if qrws.params.theta == 0.0
+    #         Q += topcharge_t(qrws, i)
+    #     else
+    #         Q += cinf_topcharge_t(qrws,i)
+    #     end
+    # end
+
+    # if qrws.params.theta == 0.0
+    #     Q += boundary_topcharge(qrws)
+    # else
+    #     Q += boundary_cinf_topcharge(qrws)
+    # end
+
     for i in 1:qrws.params.iT-1
-        if qrws.params.theta == 0.0
-            Q += topcharge_t(qrws, i)
-        else
-            Q += cinf_topcharge_t(qrws,i)
-        end
+        Q += topcharge_t(qrws, i)
     end
 
-    if qrws.params.theta == 0.0
-        Q += boundary_topcharge(qrws)
-    else
-        Q += boundary_cinf_topcharge(qrws)
-    end
+    Q += boundary_topcharge(qrws)
 
     return Q/2pi
 end
@@ -23,6 +29,10 @@ end
 topcharge_t(qrws::QuantumRotor, t::Int64) = topcharge_t(qrws, qrws.params.disc, t)
 function topcharge_t(qrws::QuantumRotor, disc::Type{D}, t::Int64) where D <: AbstractAngleDifferenceDiscretization
     return Mod(qrws.phi[t], 2pi)
+end
+
+function topcharge_t(qrws::QuantumRotor, disc::Type{StandardDiscretization}, t::Int64)
+    return Mod(qrws.phi[t+1]-qrws.phi[t], 2pi)
 end
 
 cinf_topcharge_t(qrws::QuantumRotor, t::Int64) = cinf_topcharge_t(qrws, t, qrws.params.disc)
@@ -39,6 +49,8 @@ function boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{Periodic
     end
     return Mod(qt, 2pi)
 end
+
+boundary_topcharge(qrws::QuantumRotor, disc::Type{StandardDiscretization}, BC::Type{OpenBC}) = zero(qrws.PRC)
 
 boundary_cinf_topcharge(qrws::QuantumRotor) = cinf_boundary_topcharge(qrws, qrws.params.disc, qrws.params.BC)
 cinf_boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization = zero(qrws.PRC)
