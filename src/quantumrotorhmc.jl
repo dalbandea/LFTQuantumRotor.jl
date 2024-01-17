@@ -78,7 +78,7 @@ function force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardD
         hmcws.frc[t] = force_t(qrws, t, disc) + theta_force_t(qrws, t, disc)
     end
 
-    left_boundary_force!(qrws, hmcws, disc, BC)
+    left_boundary_force!(qrws, hmcws, disc, BC, aux)
     right_boundary_force!(qrws, hmcws, disc, BC)
     
     return nothing
@@ -99,7 +99,7 @@ function right_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc:
     return nothing
 end
 
-function left_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC})
+function left_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC}, aux::AUX) where AUX <: AbstractAuxFields
     iT = qrws.params.iT
     hmcws.frc[1] = +qrws.params.I * ( sin(qrws.phi[2]-qrws.phi[1]) - sin(qrws.phi[1]-qrws.phi[iT]) ) -1/2pi * ( cos(qrws.phi[1] - qrws.phi[iT]) - cos(qrws.phi[2] - qrws.phi[1]) ) * qrws.params.theta
     return nothing
@@ -111,7 +111,7 @@ function right_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc:
     return nothing
 end
 
-function left_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{OpenBC})
+function left_boundary_force!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{StandardDiscretization}, BC::Type{OpenBC}, aux::AUX) where AUX <: AbstractAuxFields
     hmcws.frc[1] = +qrws.params.I * ( sin(qrws.phi[2]-qrws.phi[1]) ) +1/2pi * ( cos(qrws.phi[2] - qrws.phi[1]) ) * qrws.params.theta
     return nothing
 end
