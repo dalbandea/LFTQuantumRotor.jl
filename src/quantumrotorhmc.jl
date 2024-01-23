@@ -32,8 +32,8 @@ function sample!(qrws::QuantumRotor, samplerws::AbstractHMC; do_winding = false)
     return nothing
 end
 
-generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC) = generate_momenta!(qrws, hmcws, qrws.params.disc)
-function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}) where D <: AbstractDiscretization
+generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC) = generate_momenta!(qrws, hmcws, qrws.params.disc, qrws.aux)
+function generate_momenta!(qrws::QuantumRotor, hmcws::QuantumRotorHMC, disc::Type{D}, aux::AbstractAuxFields) where D <: AbstractDiscretization
     for i in 1:length(hmcws.mom)
         hmcws.mom[i] = randn(qrws.PRC) * hmcws.params.width
     end
