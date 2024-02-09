@@ -94,6 +94,41 @@ function diff_top_charge(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{Standard
 end
 
 
+diff_local_susceptibility(qrws::LFTQuantumRotor.QuantumRotor) = diff_local_susceptibility(qrws, qrws.params.disc, qrws.params.BC)
+function diff_local_susceptibility(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{LFTQuantumRotor.StandardDiscretization}, ::Type{BC}) where BC <: LFTQuantumRotor.AbstractBoundaryCondition
+    chi = zero(eltype(qrws.phi))
+    for i in 1:qrws.params.iT-1
+        chi += sin(qrws.phi[i+1]-qrws.phi[i])^2
+    end
+
+    if BC == LFTQuantumRotor.PeriodicBC
+        chi += sin(qrws.phi[1]-qrws.phi[qrws.params.iT])^2
+    end
+
+    return chi/(2pi)^2/(qrws.params.iT-1)
+end
+
+diff_local_susceptibility_mf(qrws::LFTQuantumRotor.QuantumRotor) = diff_local_susceptibility_mf(qrws, qrws.params.disc, qrws.params.BC)
+function diff_local_susceptibility_mf(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{LFTQuantumRotor.StandardDiscretization}, ::Type{BC}) where BC <: LFTQuantumRotor.AbstractBoundaryCondition
+
+    if BC == LFTQuantumRotor.OpenBC
+        chis = zeros(eltype(qrws.phi), qrws.params.iT-1)
+    elseif BC == LFTQuantumRotor.PeriodicBC
+        chis = zeros(eltype(qrws.phi), qrws.params.iT)
+    end
+
+    for i in 1:qrws.params.iT-1
+        chis[i] = sin(qrws.phi[i+1]-qrws.phi[i])^2/(2pi)^2
+    end
+
+    if BC == LFTQuantumRotor.PeriodicBC
+        chis[end] = sin(qrws.phi[1]-qrws.phi[qrws.params.iT])^2/(2pi)^2
+    end
+
+    return chis
+end
+
+
 # abstract type Susceptibility <: AbstractObservable end
 
 # struct QRMasterObs end
