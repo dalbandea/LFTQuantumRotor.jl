@@ -22,7 +22,7 @@ include("quantumrotorhmc.jl")
 # include("qrmetropolis.jl")
 # include("quantumrotorhmc.jl")
 include("quantumrotormeasurements.jl")
-export diff_top_charge
+export diff_top_charge, diff_local_susceptibility_mf, diff_local_susceptibility, diff_00_susceptibility
 include("quantumrotorutils.jl")
 include("quantumrotortestfunctions.jl")
 include("quantumrotorIO.jl")

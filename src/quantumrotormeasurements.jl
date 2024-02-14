@@ -51,6 +51,9 @@ function boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{Periodic
 end
 
 boundary_topcharge(qrws::QuantumRotor, disc::Type{StandardDiscretization}, BC::Type{OpenBC}) = zero(qrws.PRC)
+function boundary_topcharge(qrws::QuantumRotor, disc::Type{StandardDiscretization}, BC::Type{PeriodicBC})
+    return Mod(qrws.phi[1]-qrws.phi[end], 2pi)
+end
 
 boundary_cinf_topcharge(qrws::QuantumRotor) = cinf_boundary_topcharge(qrws, qrws.params.disc, qrws.params.BC)
 cinf_boundary_topcharge(qrws::QuantumRotor, disc::Type{D}, BC::Type{OpenBC}) where D <: AbstractAngleDifferenceDiscretization = zero(qrws.PRC)
@@ -103,9 +106,15 @@ function diff_local_susceptibility(qrws::LFTQuantumRotor.QuantumRotor, disc::Typ
 
     if BC == LFTQuantumRotor.PeriodicBC
         chi += sin(qrws.phi[1]-qrws.phi[qrws.params.iT])^2
+        return chi/(2pi)^2/(qrws.params.iT)
     end
 
     return chi/(2pi)^2/(qrws.params.iT-1)
+end
+
+diff_00_susceptibility(qrws::LFTQuantumRotor.QuantumRotor) = diff_00_susceptibility(qrws, qrws.params.disc, qrws.params.BC)
+function diff_00_susceptibility(qrws::LFTQuantumRotor.QuantumRotor, disc::Type{LFTQuantumRotor.StandardDiscretization}, ::Type{BC}) where BC <: LFTQuantumRotor.AbstractBoundaryCondition
+    return sin(qrws.phi[2]-qrws.phi[1])^2/(2pi)^2
 end
 
 diff_local_susceptibility_mf(qrws::LFTQuantumRotor.QuantumRotor) = diff_local_susceptibility_mf(qrws, qrws.params.disc, qrws.params.BC)
